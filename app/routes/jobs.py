@@ -1,4 +1,5 @@
-from fastapi import APIRouter , Depends
+import uuid
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.jobs import Jobs
@@ -7,13 +8,13 @@ from app.auth.jwt_auth import get_curr_user
 from app.models.users import Users
 from datetime import datetime, timedelta
 from app.tasks.file_tasks import process_job
+from app.services.s3_service import generate_download_url
 
-
-router = APIRouter()  
+router = APIRouter(prefix="/auth")  
 
 # Only authenticated user are now able to create the jobs <<<<Protected Route bolte h>>>>
 
-@router.post("/auth/jobs", response_model=JobResponse)
+@router.post("/jobs", response_model=JobResponse)
 def create_job(
     job: JobCreate,
     db: Session = Depends(get_db),
@@ -40,7 +41,48 @@ def create_job(
     return new_job
 
 
+@router.get("/jobs/{job_id}", response_model=JobResponse)
+def get_job(job_id: uuid.UUID, db: Session = Depends(get_db), curr_user: Users = Depends(get_curr_user)):
 
+    # try:
+    #     job_uuid = uuid.UUID(job_id)
+    # except:
+    #     raise HTTPException(status_code=400, detail="Job id format is invalid")
+    
+    job = db.query(Jobs).filter(Jobs.id == job_id).first()
+
+    if not job:
+        raise HTTPException(status_code=400, detail="Job not found")
+
+    # Checking if the user owns the job or not
+    if job.user_id != curr_user.id:
+        raise HTTPException(status_code=403, detail="Not Authorized")
+
+    download_url = None
+
+    print(f"This is my output_file_key: {job.output_file_key}" )
+
+    if job.status.value == "completed" and job.output_file_key:
+        download_url = generate_download_url(job.output_file_key)
+    else:
+        print("No output_file_key found")
+
+    response = JobResponse.model_validate(job)
+    response.download_url = download_url
+    print("response generated")
+    print(response.download_url)
+
+    return response
+
+
+
+# @router.get("/test")
+# def test_path():
+
+#     print("Started")
+#     process_job.delay("123")
+#     print("Ended")
+#     return 2
 
 
 

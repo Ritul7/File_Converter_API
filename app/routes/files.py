@@ -15,6 +15,6 @@ async def create_upload_url(
     print(f"The {curr_user.email} is requesting a url")
     result = await generate_upload_url(my_file)
 
-    return result["upload_url"]
+    return result
 
 

@@ -14,7 +14,7 @@ AWS_BUCKET = os.getenv("AWS_S3_BUCKET_NAME")
 
 def get_s3_client():
     return boto3.client(
-        's3',
+        "s3",
         aws_access_key_id=AWS_ACCESS_KEY,
         aws_secret_access_key=AWS_SECRET_KEY,
         region_name=AWS_REGION
@@ -46,9 +46,11 @@ async def generate_upload_url(file: UploadFile):
         print(f"DEBUG ERROR: {type(e).__name__} - {str(e)}") # This will show the real error
         return {"error": str(e)}
     
-def generate_download_url(file_key: UploadFile):
+def generate_download_url(file_key: str):           # File ko download krne ke liye jo URL generate kr rhe h, usme sirf file ka name jaruri hai... not the whole file  
     s3 = get_s3_client()
 
+    print("s3 client created")
+    
     return s3.generate_presigned_url(
         "get_object",
         Params={

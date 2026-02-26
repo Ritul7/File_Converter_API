@@ -21,6 +21,7 @@ class JobResponse(BaseModel):
     status: JobStatus
     created_at: datetime
     expires_at: datetime
+    download_url: str | None = None
 
     class Config:
         from_attributes = True
