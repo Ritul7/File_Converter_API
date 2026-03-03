@@ -24,6 +24,6 @@ class Jobs(Base):
     output_file_key = Column(String, nullable=True)
     output_format = Column(String, nullable=False)
     status = Column(Enum(JobStatus), default=JobStatus.pending, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
     expires_at = Column(DateTime, nullable=False)
 

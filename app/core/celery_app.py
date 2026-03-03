@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 logger.info("Initializing Celery application...")
 
+# celery = Celery(
+#     "worker",
+#     broker="redis://redis:6379",
+#     backend="redis://redis:6379",
+# )
 celery = Celery(
     "worker",
     broker="redis://localhost:6379",

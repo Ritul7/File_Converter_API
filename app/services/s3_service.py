@@ -56,6 +56,8 @@ def generate_download_url(file_key: str):           # File ko download krne ke l
         Params={
             "Bucket": AWS_BUCKET,
             "Key": file_key,
+            "ResponseContentDisposition": "attachment; filename=converted.docx",
+            "ResponseContentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         },
         ExpiresIn=300
     )

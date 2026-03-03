@@ -1,4 +1,5 @@
 import uuid
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.session import get_db
@@ -9,6 +10,9 @@ from app.models.users import Users
 from datetime import datetime, timedelta
 from app.tasks.file_tasks import process_job
 from app.services.s3_service import generate_download_url
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 router = APIRouter(prefix="/auth")  
 
@@ -30,9 +34,14 @@ def create_job(
     db.commit()
     db.refresh(new_job)
     print("handling task")
+    logger.info("Handling Task, just before try block")
     
     try:
+        print("Inside the try block")
+        logger.info("Starting process_job.delay()")
         process_job.delay(str(new_job.id))          # Ye background me task ko trigger krega, uuid ek object hota h
+        logger.info(f"process_job.delay() finished for new_job.id: {new_job.id}")
+
     except Exception as e:
         print("error ------------:",e)  
     else:
@@ -83,16 +92,6 @@ def get_job(job_id: uuid.UUID, db: Session = Depends(get_db), curr_user: Users =
 #     process_job.delay("123")
 #     print("Ended")
 #     return 2
-
-
-
-
-
-
-
-
-
-
 
 
 

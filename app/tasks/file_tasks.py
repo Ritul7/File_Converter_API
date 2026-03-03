@@ -18,6 +18,8 @@ AWS_BUCKET = os.getenv("AWS_S3_BUCKET_NAME")
 # Create logger
 logger = logging.getLogger(__name__)
 
+logging.basicConfig(level=logging.INFO)
+
 @celery.task(bind=True)
 def process_job(self, job_id: str):
 
@@ -29,6 +31,7 @@ def process_job(self, job_id: str):
     job = None
 
     job_uuid = uuid.UUID(job_id)
+    print(f"job_uuid is: {job_uuid}")
 
     logger.info(f"Started processing job: {job_uuid}")
 
@@ -79,10 +82,17 @@ def process_job(self, job_id: str):
             # Ab converted file upload hogi on s3
             output_key = f"outputs/{output_filename}"
 
+            print("Output path:", output_path)
+            print("Exists:", os.path.exists(output_path))
+            print("Size:", os.path.getsize(output_path))
+
             s3.upload_file(                                     # s3.upload_file(Local_path, Bucket, Key(address)): Takes the converted file and uploads on s3 on address'key'(new)
                 output_path,
                 AWS_BUCKET,
-                output_key
+                output_key,
+                ExtraArgs={
+                    "ContentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                }
             )
 
             logger.info(f"Uploaded file for job: {job_uuid}")

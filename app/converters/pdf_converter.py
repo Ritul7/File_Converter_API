@@ -10,9 +10,14 @@ class PdfToImageConverter(BaseConverter):
     def convert(self, input_path:str, output_path:str):
         try:
             images = convert_from_path(input_path, thread_count=2)
-            images[0].save(output_path)                         # It will only take the first page of the pdf and then converts it into png
+
+            if not images:
+                raise Exception("No images found in PDF")
+
+            # images[0].save(output_path)                         # It will only take the first page of the pdf and then converts it into png
         
-            images[0].save(output_path, "JPEG" if output_path.endswith(".jpg") else "PNG")
+            fmt = "JPEG" if output_path.lower().endswith((".jpg", ".jpeg")) else "PNG"
+            images[0].save(output_path, fmt)
 
         except Exception as exc:
             logger.error(f"Image Conversion Error= {str(exc)}")
@@ -23,13 +28,15 @@ class PdfToDocxConverter(BaseConverter):
 
         try:
             cv = Converter(input_path)                      # input_path: jaha pr copy of pdf file store hogi
-            cv.convert(output_path, start=0, end=None)      # output path: Is the path where converted file will be stored
+            cv.convert(output_path)      # output path: Is the path where converted file will be stored. start is the no of page from which the converter will start conerting, end is the page no upto which converter will convert the page.
             cv.close()
         except Exception as e:
             print(f"Conversion Error: {str(e)}")
             raise e
 
-# ........Clearly dikh rha(uncomment krne pr dikhega) h ki, input to le nhi rha h, so basically ye library bs ek fake docs return kr rhi h, not actually converting and then returning it, so we'll be using pdf2docx library.........
+
+
+# ........Clearly dikh rha(uncomment krne pr dikhega, below written code) h ki, input to le nhi rha h, so basically ye library bs ek fake docs return kr rhi h, not actually converting and then returning it, so we'll be using pdf2docx library.........
 
 # class PdfToDocxConverter(BaseConverter):
 #     def convert(self, input_path:str, output_path:str):
